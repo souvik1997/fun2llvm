@@ -12,11 +12,11 @@ CFLAGS=-g -std=gnu99 -O0 -Werror -Wall
 CC=gcc
 LLVM_C=clang
 
-pd : src/pd.o src/parser.o Makefile
-	$(CC) $(CFLAGS) -o pd src/pd.o src/parser.o
+pd : bin/pd.o bin/parser.o Makefile
+	$(CC) $(CFLAGS) -o pd bin/pd.o bin/parser.o
 
-src/%.o : src/%.c Makefile
-	$(CC) $(CFLAGS) -MD -c src/$*.c -o src/$*.o
+bin/%.o : src/%.c Makefile
+	$(CC) $(CFLAGS) -MD -c src/$*.c -o bin/$*.o
 
 %.ll : %.fun pd
 	@echo "========== $* =========="
