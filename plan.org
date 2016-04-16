@@ -1,0 +1,14 @@
+* Plan
+1. Decide on a language (we chose C)
+   1. Implement parser if not C
+2. Learn LLVM, and things relevant to .fun (labels, functions, global/local variables, constants)
+   1. Find relevant LLVM attributes/accessories
+3. Print out appropriate LLVM code
+4. Benchmarking
+
+* Timeline
+This week: pc
+Next week: pd
+
+Friday 4/22: have updated parser, understand LLVM (see above), reimplement p4 with LLVM
+Saturday 4/23: Meet and hopefully wrap up
