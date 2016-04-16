@@ -12,3 +12,6 @@ Next week: pd
 
 Friday 4/22: have updated parser, understand LLVM (see above), reimplement p4 with LLVM
 Saturday 4/23: Meet and hopefully wrap up
+
+* Notes
+Everything is a uint64
