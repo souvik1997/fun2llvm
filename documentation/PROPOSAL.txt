@@ -1,0 +1,23 @@
+Team members:
+
+Souvik Banerjee
+Saket Sadani
+Michael "Tres" Brenan III
+
+Proposal:
+
+The proposal is to implement an LLVM-based compiler for the fun language (based on the specificaton
+in p4), using the Scala programming language.
+
+The compiler will implement the entirety of the language described in the original problem, as well as
+adding additional common operators (like subtraction, division, etc), and will emit LLVM IR which can be
+compiled using the LLVM linker/optimizer/compiler. The compiler will also implement some simple optimizations
+on it's own, such as dead code elimination, loop unrolling, constant expression simplification, and so on.
+
+Other optimizations will be added as we go along. If time allows, we'll do other neat things which are expected
+of a compiler or a language.
+
+Furthermore, we'll provide benchmarks and a decent selection of sample code in order to demonstrate any noticable
+differences between the (very) naive p4 compilers and our optimized, LLVM-based compiler.
+
+NOTE: Dr. Gheith approved this project for 3 people during office hours.
