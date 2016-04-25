@@ -74,12 +74,19 @@ object FunParser {
 			opList.foldLeft(left) { case (accum, (op, next)) => operator_map(op)(accum, next) }
 		}
 	}
+	
+	// Useful for delimiting comma-seperated lists.
+	def commaSeperator : P0 = P(whitespaceRep ~ "," ~ whitespaceRep)
 
 	// Resolves precedence due to parenthesis, and automatically consumes whitespace as well.
 	def parens : P[Expression] = P(whitespaceRep ~ "(" ~ expression ~ ")" ~ whitespaceRep)
+	
+	// Resolves a function call of the form <identifier>(expr1, ...)
+	def functionCall : P[Expression] = P(whitespaceRep ~ identifier.! ~ "(" ~ expression.rep(sep = commaSeperator) ~ ")" ~ whitespaceRep)
+	  .map { case ((name, params)) => Call(name, params.toList) }
 
 	// The highest precedence is either a constant, a variable, or a paren-wrapped expression.
-	def expr_pred0 : P[Expression] = P(constant | variable | parens)
+	def expr_pred0 : P[Expression] = P(functionCall | constant | variable | parens)
 
 	// Followed by multiplicative stuff
 	def expr_pred1 : P[Expression] = createPrecedenceParser(expr_pred0)("+" -> Addition)

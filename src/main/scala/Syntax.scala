@@ -47,6 +47,9 @@ object Syntax {
 
 	// Represents a variable which may have a dynamic value at runtime.
 	case class Variable(val name: String) extends Expression
+	
+	// Represents a function call with a specific set of parameters.
+	case class Call(val function: String, val parameters: ListOf[Expression]) extends Expression
 
 	// Represents the set of binary operations between two subexpressions.
 	sealed class BinaryOperation(val left: Expression, val right: Expression) extends Expression
