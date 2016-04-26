@@ -1,8 +1,8 @@
 TESTS=$(sort $(wildcard tests/*.fun))
-PROGS=$(patsubst %.fun, %.bin ,$(TESTS))
-OUTS=$(patsubst %.fun,%.out,$(TESTS))
-DIFFS=$(patsubst %.fun,%.diff,$(TESTS))
-RESULTS=$(patsubst %.fun,%.result,$(TESTS))
+P4PROGS=$(patsubst %.fun, %.bin ,$(TESTS))
+P4OUTS=$(patsubst %.fun,%.out,$(TESTS))
+P4DIFFS=$(patsubst %.fun,%.diff,$(TESTS))
+P4RESULTS=$(patsubst %.fun,%.result,$(TESTS))
 
 .SECONDARY:
 
@@ -24,26 +24,26 @@ bin/%.o : %.S Makefile
 	@echo "========== $* =========="
 	./bin/souvikp4 < $*.fun > $*.S
 
-progs : $(PROGS)
+p4progs : $(P4PROGS)
 
-$(PROGS) : %.bin : %.S
+$(P4PROGS) : %.bin : %.S
 	gcc -o $@ $*.S
 
-outs : $(OUTS)
+p4outs : $(P4OUTS)
 
-$(OUTS) : %.out : %.bin
+$(P4OUTS) : %.out : %.bin
 	./$*.bin > $*.out
 
-diffs : $(DIFFS)
+p4diffs : $(p4DIFFS)
 
-$(DIFFS) : %.diff : Makefile %.out %.ok
+$(P4DIFFS) : %.diff : Makefile %.out %.ok
 	@(((diff -b $*.ok $*.out > /dev/null 2>&1) && (echo "===> $* ... pass")) || (echo "===> $* ... fail" ; echo "----- expected ------"; cat $*.ok ; echo "----- found -----"; cat $*.out)) > $*.diff 2>&1
 
-$(RESULTS) : %.result : Makefile %.diff
+$(P4RESULTS) : %.result : Makefile %.diff
 	@cat $*.diff
 
-test : Makefile $(DIFFS)
-	@cat $(DIFFS)
+p4test : Makefile $(P4DIFFS)
+	@cat $(P4DIFFS)
 
 clean :
 	rm -f $(PROGS)
