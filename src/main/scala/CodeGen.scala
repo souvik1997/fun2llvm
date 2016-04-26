@@ -5,5 +5,5 @@
  * the LLVM IR language.
  */
 object CodeGen {
-  
+
 }
