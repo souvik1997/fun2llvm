@@ -26,8 +26,8 @@ bin/%.o : %.S Makefile
 
 progs : $(PROGS)
 
-$(PROGS) : %.bin : %.o
-	gcc -o $@ $*.o
+$(PROGS) : %.bin : %.S
+	gcc -o $@ $*.S
 
 outs : $(OUTS)
 
