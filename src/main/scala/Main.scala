@@ -6,6 +6,7 @@
  */
 object Main {
     def main(args: Array[String]) = {
+        System.out.println(args(0));
 	// Some easier tests
 	System.out.println(FunParser.constant.parse("12"));
 	System.out.println(FunParser.constant.parse("1298123"))

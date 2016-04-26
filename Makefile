@@ -1,8 +1,18 @@
+SHELL:=/bin/bash -O globstar
 TESTS=$(sort $(wildcard tests/*.fun))
 P4PROGS=$(patsubst %.fun, %.bin ,$(TESTS))
 P4OUTS=$(patsubst %.fun,%.out,$(TESTS))
 P4DIFFS=$(patsubst %.fun,%.diff,$(TESTS))
 P4RESULTS=$(patsubst %.fun,%.result,$(TESTS))
+
+PDPROGS=$(patsubst %.fun, %.pd.bin ,$(TESTS))
+PDLLS=$(patsubst %.fun, %.ll ,$(TESTS))
+PDOUTS=$(patsubst %.fun,%.pd.out,$(TESTS))
+P4DIFFS=$(patsubst %.fun,%.pd.diff,$(TESTS))
+P4RESULTS=$(patsubst %.fun,%.pd.result,$(TESTS))
+
+SRC = src
+SCALA_SOURCES = $(shell ls $(SRC)/**/*.scala)
 
 .SECONDARY:
 
@@ -34,7 +44,7 @@ p4outs : $(P4OUTS)
 $(P4OUTS) : %.out : %.bin
 	./$*.bin > $*.out
 
-p4diffs : $(p4DIFFS)
+p4diffs : $(P4DIFFS)
 
 $(P4DIFFS) : %.diff : Makefile %.out %.ok
 	@(((diff -b $*.ok $*.out > /dev/null 2>&1) && (echo "===> $* ... pass")) || (echo "===> $* ... fail" ; echo "----- expected ------"; cat $*.ok ; echo "----- found -----"; cat $*.out)) > $*.diff 2>&1
@@ -44,6 +54,25 @@ $(P4RESULTS) : %.result : Makefile %.diff
 
 p4test : Makefile $(P4DIFFS)
 	@cat $(P4DIFFS)
+
+pd: $(SCALA_SOURCES)
+	@./sbt compile
+
+$(PDLLS): $(TESTS) pd
+	@./sbt "project root" "run $@"
+
+$(PDPROGS): %.pd.bin : %.ll
+	clang -o $@ $*.ll
+
+$(PDOUTS): %.pd.out : %.pd.bin
+	./$*.pd.bin > $*.pd.out
+
+$(PDDIFFS) : %.pd.diff : Makefile %.pd.out %.ok
+	@(((diff -b $*.ok $*.out > /dev/null 2>&1) && (echo "===> $* ... pass")) || (echo "===> $* ... fail" ; echo "----- expected ------"; cat $*.ok ; echo "----- found -----"; cat $*.out)) > $*.pd.diff 2>&1
+
+
+pdtest: Makefile $(PDDIFFS)
+	@cat $(PDDIFFS)
 
 clean :
 	rm -f $(PROGS)
