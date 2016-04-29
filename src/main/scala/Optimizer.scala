@@ -19,6 +19,7 @@ object Optimizer {
 		case (left, Constant(0)) => left
 		case _ => expr
 	}
+
 	case Multiplication(_left, _right) => (optimizeExpr(_left), optimizeExpr(_right)) match {
 		case (Constant(x), Constant(y)) => Constant(x * y)
 		case (Constant(1), right) => right
@@ -28,6 +29,22 @@ object Optimizer {
 		case _ => expr
 	}
 
-	case normal => normal
+	case Equal(_left, _right) => optimizeEquality(optimizeExpr(_left), optimizeExpr(_right), _ == _, true)
+	case LessThan(_left, _right) => optimizeEquality(optimizeExpr(_left), optimizeExpr(_right), _ < _, false)
+	case GreaterThan(_left, _right) => optimizeEquality(optimizeExpr(_left), optimizeExpr(_right), _ > _, false)
+	case NotEqual(_left, _right) => optimizeEquality(optimizeExpr(_left), optimizeExpr(_right), _ != _, false)
+
+	case _ => expr
   }
-}
+
+  /*
+   * Provides a generic equality optimizer, which takes an equality operation. The tautology
+   * boolean is returned when two of the same variable are compared against each other.
+   */
+  def optimizeEquality(left: Expression, right: Expression, operation: (Long, Long) => Boolean, 
+  	tautology: Boolean) : Expression = (left, right) match {
+  	case (Constant(x), Constant(y)) if operation(x, y) => Constant(1)
+  	case (Constant(x), Constant(y)) if !operation(x, y) => Constant(0)
+  	case (Variable(var1), Variable(var2)) if var1 == var2 => Constant(if(tautology) 1 else 0)
+  }
+} 
