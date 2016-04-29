@@ -1,3 +1,5 @@
+package pd
+
 import fastparse.all._
 import Syntax._
 
@@ -6,24 +8,14 @@ import Syntax._
  * and producing a nice Abstract Syntax Tree out of it.
  */
 object FunParser {
-    /*
-     * The most simple form of parsing - take in an input string, and produce an Abstract Syntax Tree of the
-     * resulting program.
-     */
-    def parse(input: String) : Either[String, Syntax.Program] = {
-	val logged = scala.collection.mutable.Buffer.empty[String]
-	implicit val logger = fastparse.Logger(logged.append(_))
-
-	val res = program.parse(input) match {
-	    case Parsed.Success(value, index) => Right(value)
-	    case fail@Parsed.Failure(parser, index, error) => {
-		Left(error.traced.trace)
-	    }
+	/*
+	 * The most simple form of parsing - take in an input string, and produce an Abstract Syntax Tree of the
+	 * resulting program.
+	 */
+	def parse(input: String) : Either[String, Syntax.Program] = program.parse(input) match {
+		case Parsed.Success(value, index) => Right(value)
+		case fail@Parsed.Failure(parser, index, error) => Left(error.traced.trace)
 	}
-
-	System.out.println(logged.mkString("\n"))
-	res
-    }
 
     // Here, we get to define the set of parsers we use, combined via lovely parser combinators.
 
