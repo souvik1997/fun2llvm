@@ -9,6 +9,9 @@ import java.io.PrintStream
  * the LLVM IR language.
  */
 object CodeGen {
+
+    def indentedPrintln(indent: int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
+
     def generate(program: Program, output: PrintStream) : Unit = program.functions.foreach(func => generateFunction(func, output, 0))
 
     def generateFunction(function: Function, output: PrintStream, indent: Int): Unit = {
@@ -30,7 +33,7 @@ object CodeGen {
      */
     def generateStatement(context: Function, body: Statement, output: PrintStream, indent: Int): Unit = body match {
         case Sequence(statements) => statements.foreach(state => generateStatement(context, state, output, indent))
-        case Print(value) => ???
+        case Print(value) =>
         case Assign(variable, value) => ???
         case Return(value) => ???
         case If(pred, trueBody, falseBody) => ??? // Falsebody could be NoOp, so don't emit if it is
@@ -41,7 +44,7 @@ object CodeGen {
     /*
      * Generates the LLVM IR for an expression, and produces the next available temporary variable.
      */
-    def generateExpression(context: Function, expr: Expression, output: PrintStream, 
+    def generateExpression(context: Function, expr: Expression, output: PrintStream,
         tempVariable: Int, indent: Int) : Int = expr match {
         case Constant(value) => ???
         case Variable(name) => ???
