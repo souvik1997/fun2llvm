@@ -6,9 +6,9 @@ import Syntax._
 /*
  * Implements the parser part of pd, which is responsible for taking the raw FUN source
  * and producing a nice Abstract Syntax Tree out of it.
- * 
+ *
  * The parser can generally deal with whitespace, and does so by eliminating any whitespace at the beginning
- * of the file 
+ * of the file
  */
 object FunParser {
     /*
@@ -41,7 +41,7 @@ object FunParser {
 
     // Parses a Constant as a numeric literal, consuming whitespace around it.
     def constant : P[Constant] = number.map(Syntax.Constant)
-    
+
     // Parses a variable as an identifier, consuming whitespace around it.
     def variable : P[Variable] = identifier.map(Syntax.Variable)
 
@@ -133,7 +133,7 @@ object FunParser {
     // A function is a "fun" keyword, followed by an identifier and a comma seperated arguments list, followed by
     // a statement.
 
-    def function : P[Function] = P(token("fun") ~/ identifier.! ~/ char('(') ~/ variable.rep(sep = commaSeperator) ~/ char(')') ~/ statement)
+    def function : P[Function] = P(token("fun") ~/ whitespaceRep ~/ identifier.! ~/ whitespaceRep ~ char('(') ~/ variable.rep(sep = commaSeperator) ~/ char(')') ~/ statement)
       .map { case (name, vars, statement) => Function(name, vars.toList, statement) }
 
     // A full program parser, which attempts to parse the entire file as a program.

@@ -29,7 +29,10 @@ object Main {
             val fileInput = io.Source.fromFile(s"tests/t$num.fun").getLines.mkString("\n")
 
             FunParser.parse(fileInput) match {
-                case Right(x) => println(s"t$num ... pass")
+                case Right(x) => {
+                    println(s"t$num ... pass")
+                    CodeGen.generate(x)
+                }
                 case Left(x) => println(s"t$num ... fail\n$x")
             }
         }
