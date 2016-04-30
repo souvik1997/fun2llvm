@@ -24,5 +24,14 @@ object Main {
         println(expr2 + " -> " + Optimizer.optimizeExpr(expr2))
         println(expr3 + " -> " + Optimizer.optimizeExpr(expr3))
 
+        for (num <- 0 to 7) {
+            // Check that all of the files parse successfully.
+            val fileInput = io.Source.fromFile(s"tests/t$num.fun").getLines.mkString("\n")
+
+            FunParser.parse(fileInput) match {
+                case Right(x) => println(s"t$num ... pass")
+                case Left(x) => println(s"t$num ... fail\n$x")
+            }
+        }
     }
 }

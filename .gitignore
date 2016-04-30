@@ -36,3 +36,9 @@ tests/*.o
 .#*
 bin/
 .ensime_cache
+
+# Eclipse specific project files
+.cache-main
+.settings
+.project
+.classpath
