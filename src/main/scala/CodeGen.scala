@@ -10,7 +10,10 @@ import java.io.PrintStream
  */
 object CodeGen {
 
-    def indentedPrintln(indent: int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
+    var curTemp: Int = 0
+    def getNextTempVar(): Int = { curTemp += 1; curTemp }
+
+    def indentedPrintln(indent: Int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
 
     def generate(program: Program, output: PrintStream) : Unit = program.functions.foreach(func => generateFunction(func, output, 0))
 
@@ -45,17 +48,35 @@ object CodeGen {
      * Generates the LLVM IR for an expression, and produces the next available temporary variable.
      */
     def generateExpression(context: Function, expr: Expression, output: PrintStream,
-        tempVariable: Int, indent: Int) : Int = expr match {
-        case Constant(value) => ???
-        case Variable(name) => ???
-        case Call(function, params) => ???
+        indent: Int) : Int = {
+        val tempVariable = getNextTempVar()
+        expr match {
+            case Constant(value) => indentedPrintln(indent, output, "%${tempVariable} = add i64 0, ${value}")
+            case Variable(name) => {
+                val prefix = if (context.arguments.contains(name)) "%" else "@"
+                indentedPrintln(indent, output, "%${tempVariable} = load i64, i64* ${prefix}${name}")
+            }
+            case Call(function, params) => {
+                val args = params.map(p => "%"+generateExpression(context, p, output, indent))
+                indentedPrintln(indent, output, "${tempVariable} = call i64 ${function} (${args})")
+            }
 
-        case Addition(left, right) => ???
-        case Multiplication(left, right) => ???
-        case Equal(left, right) => ???
-        case LessThan(left, right) => ???
-        case GreaterThan(left, right) => ???
-        case NotEqual(left, right) => ???
+            case Addition(left, right) => {
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, left, output, indent)
+                indentedPrintln(indent, output, "${tempVariable} = add i64 %${ltmp}, %${rtmp}")
+            }
+            case Multiplication(left, right) => {
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, left, output, indent)
+                indentedPrintln(indent, output, "${tempVariable} = mul i64 %${ltmp}, %${rtmp}")
+            }
+            case Equal(left, right) => ???
+            case LessThan(left, right) => ???
+            case GreaterThan(left, right) => ???
+            case NotEqual(left, right) => ???
+        }
+        return tempVariable
     }
 
 }
