@@ -63,18 +63,42 @@ object CodeGen {
 
             case Addition(left, right) => {
                 val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
                 indentedPrintln(indent, output, "${tempVariable} = add i64 %${ltmp}, %${rtmp}")
             }
             case Multiplication(left, right) => {
                 val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
                 indentedPrintln(indent, output, "${tempVariable} = mul i64 %${ltmp}, %${rtmp}")
             }
-            case Equal(left, right) => ???
-            case LessThan(left, right) => ???
-            case GreaterThan(left, right) => ???
-            case NotEqual(left, right) => ???
+            case Equal(left, right) => {
+                val intermediate = getNextTempVar()
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
+                indentedPrintln(indent, output, "${intermediate} = icmp eq i64 %${ltmp}, %${rtmp}")
+                indentedPrintln(indent, output, "${tempVariable} = zext i1 ${intermediate} to i64")
+            }
+            case LessThan(left, right) => {
+                val intermediate = getNextTempVar()
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
+                indentedPrintln(indent, output, "${intermediate} = icmp ult i64 %${ltmp}, %${rtmp}")
+                indentedPrintln(indent, output, "${tempVariable} = zext i1 ${intermediate} to i64")
+            }
+            case GreaterThan(left, right) => {
+                val intermediate = getNextTempVar()
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
+                indentedPrintln(indent, output, "${intermediate} = icmp ugt i64 %${ltmp}, %${rtmp}")
+                indentedPrintln(indent, output, "${tempVariable} = zext i1 ${intermediate} to i64")
+            }
+            case NotEqual(left, right) => {
+                val intermediate = getNextTempVar()
+                val ltmp = generateExpression(context, left, output, indent)
+                val rtmp = generateExpression(context, right, output, indent)
+                indentedPrintln(indent, output, "${intermediate} = icmp ne i64 %${ltmp}, %${rtmp}")
+                indentedPrintln(indent, output, "${tempVariable} = zext i1 ${intermediate} to i64")
+            }
         }
         return tempVariable
     }
