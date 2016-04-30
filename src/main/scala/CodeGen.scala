@@ -45,7 +45,7 @@ object CodeGen {
     }
 
     /*
-     * Generates the LLVM IR for an expression, and produces the next available temporary variable.
+     * Generates the LLVM IR for an expression, and returns the temporary variable that contains the value of this expression
      */
     def generateExpression(context: Function, expr: Expression, output: PrintStream,
         indent: Int) : Int = {
