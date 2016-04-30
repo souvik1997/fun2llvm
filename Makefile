@@ -1,4 +1,4 @@
-SHELL:=/bin/bash -O globstar
+SHELL:=/usr/bin/env bash -O globstar
 TESTS=$(sort $(wildcard tests/*.fun))
 P4PROGS=$(patsubst %.fun, %.bin ,$(TESTS))
 P4OUTS=$(patsubst %.fun,%.out,$(TESTS))
