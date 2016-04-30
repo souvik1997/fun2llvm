@@ -54,7 +54,7 @@ object Syntax {
     case class Call(val function: String, val parameters: ListOf[Expression]) extends Expression
 
     // Represents the set of binary operations between two subexpressions.
-    sealed class BinaryOperation(val left: Expression, val right: Expression) extends Expression
+    sealed abstract class BinaryOperation(val left: Expression, val right: Expression) extends Expression
 
     // Represents integer addition between two subexpressions.
     case class Addition(override val left: Expression, override val right: Expression) extends BinaryOperation(left, right)

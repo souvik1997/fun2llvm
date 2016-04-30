@@ -16,7 +16,7 @@ object Main {
         val Parsed.Success(expr3, _) = FunParser.expr_pred2.parse("1 + 2")
         val result = FunParser.parse("fun main(a, b) \n { \n}")
         result match {
-            case Right(x) => { CodeGen.generate(x) }
+            case Right(x) => { CodeGen.generate(x, System.out) }
             case Left(x) => { println("Error " + x) }
         }
 
@@ -31,7 +31,7 @@ object Main {
             FunParser.parse(fileInput) match {
                 case Right(x) => {
                     println(s"t$num ... pass")
-                    CodeGen.generate(x)
+                    CodeGen.generate(x, System.out)
                 }
                 case Left(x) => println(s"t$num ... fail\n$x")
             }
