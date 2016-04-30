@@ -35,3 +35,4 @@ tests/*.bin
 tests/*.o
 .#*
 bin/
+.ensime_cache

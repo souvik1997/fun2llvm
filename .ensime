@@ -1,0 +1,25 @@
+(
+ :root-dir "/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd"
+ :cache-dir "/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd/.ensime_cache"
+ :scala-compiler-jars ("/Users/souvik/.ivy2/cache/org.scala-lang/scala-compiler/jars/scala-compiler-2.11.8.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.8.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scalap/jars/scalap-2.11.8.jar")
+ :name "root"
+ :java-home "/Library/Java/JavaVirtualMachines/jdk1.8.0_77.jdk/Contents/Home"
+ :java-flags ("-Xss2m" "-Xms1024m" "-Xmx1024m" "-XX:ReservedCodeCacheSize=128m" "-XX:MaxMetaspaceSize=256m")
+ :reference-source-roots ("/Library/Java/JavaVirtualMachines/jdk1.8.0_77.jdk/Contents/Home/src.zip")
+ :scala-version "2.11.8"
+ :compiler-args ("-feature" "-deprecation" "-Xlint" "-Yinline-warnings" "-Yno-adapted-args" "-Ywarn-dead-code" "-Ywarn-numeric-widen" "-Xfuture" "-Ywarn-unused-import" "-Ymacro-expand:discard")
+ :formatting-prefs nil
+ :disable-source-monitoring nil
+ :disable-class-monitoring nil
+ :subprojects ((
+   :name "root"
+   :source-roots ("/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd/src/main/scala")
+   :targets ("/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd/target/scala-2.11/classes")
+   :test-targets ("/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd/target/scala-2.11/test-classes")
+   :depends-on-modules nil
+   :compile-deps ("/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse-utils_2.11/jars/fastparse-utils_2.11-0.3.7.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse_2.11/jars/fastparse_2.11-0.3.7.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/sourcecode_2.11/jars/sourcecode_2.11-0.1.1.jar")
+   :runtime-deps nil
+   :test-deps nil
+   :doc-jars ("/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse-utils_2.11/docs/fastparse-utils_2.11-0.3.7-javadoc.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse_2.11/docs/fastparse_2.11-0.3.7-javadoc.jar" "/Users/souvik/Documents/Coursework/Spring 2016/CS 429H/Assignments/souvikb_cs429h_s16_pd/cs429h_pd/target/scala-2.11/pd-scala_2.11-0.0-javadoc.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scala-library/docs/scala-library-2.11.8-javadoc.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/sourcecode_2.11/docs/sourcecode_2.11-0.1.1-javadoc.jar")
+   :reference-source-roots ("/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse-utils_2.11/srcs/fastparse-utils_2.11-0.3.7-sources.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/fastparse_2.11/srcs/fastparse_2.11-0.3.7-sources.jar" "/Users/souvik/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.11.8-sources.jar" "/Users/souvik/.ivy2/cache/com.lihaoyi/sourcecode_2.11/srcs/sourcecode_2.11-0.1.1-sources.jar")))
+)
