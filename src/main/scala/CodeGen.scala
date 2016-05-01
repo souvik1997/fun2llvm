@@ -72,7 +72,19 @@ object CodeGen {
             indentedPrintln(indent-2, output, s"${labelPrefixElse}:")
             generateStatement(context, falseBody, output, indent + 4, getNextTempVar)
         } // Falsebody could be NoOp, so don't emit if it is
-        case While(pred, body) => ???
+        case While(pred, body) => {
+            val res = generateExpression(context, pred, output, indent, getNextTempVar)
+            val truncatedCondition = getNextTempVar()
+            indentedPrintln(indent, output, s"%${truncatedCondition} = trunc u64 %${res} to i1")
+            val labelPrefix = "__"+context.name+"_while_"+truncatedCondition
+            val labelPrefixBegin = labelPrefix+"_begin"
+            val labelPrefixEnd = labelPrefix+"_end"
+            indentedPrintln(indent-2, output, s"${labelPrefixBegin}:")
+            indentedPrintln(indent, output, s"br i1 %${truncatedCondition}, label ${labelPrefixBegin}, label ${labelPrefixEnd}")
+            generateStatement(context, body, output, indent + 4, getNextTempVar)
+            indentedPrintln(indent, output, s"br label ${labelPrefixBegin}")
+            indentedPrintln(indent-2, output, s"${labelPrefixEnd}:")
+        }
         case NoOp => () // Emit nothing for No-op
     }
 
