@@ -5,3 +5,5 @@ lazy val root = (project in file(".")).settings(
 )
 
 libraryDependencies += "com.lihaoyi" %% "fastparse" % "0.3.7"
+libraryDependencies += "com.github.scopt" %% "scopt" % "3.4.0"
+resolvers += Resolver.sonatypeRepo("public")
