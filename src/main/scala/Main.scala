@@ -24,7 +24,7 @@ object Main {
                 val outputStream = if (config.output.getName().equals("-")) System.out else new PrintStream(config.output)
                 FunParser.parse(fileInput) match {
                     case Right(x) => {
-                        CodeGen.generate(x, outputStream)
+                        CodeGen.generate(x, outputStream, io.Source.fromFile(config.lib).getLines.mkString("\n"))
                     }
                     case Left(x) => println(s"Failed to parse ${config.input}\n$x")
                 }
@@ -37,4 +37,4 @@ object Main {
     }
 }
 
-case class Config(input: File = new File("-"), output: File = new File("-"))
+case class Config(input: File = new File("-"), output: File = new File("-"), lib: File = new File("lib/libfun.ll"))

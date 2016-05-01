@@ -55,8 +55,12 @@ $(P4RESULTS) : %.result : Makefile %.diff
 p4test : Makefile $(P4DIFFS)
 	@cat $(P4DIFFS)
 
+lib/libfun.ll: Makefile
+	clang -S -emit-llvm -o lib/libfun.ll lib/libfun.c
+
 pd: $(SCALA_SOURCES)
 	@./sbt compile
+pdbins: $(PDLLS)
 
 $(PDLLS): %.ll : $(TESTS)
 	@./sbt "project root" "run -i $*.fun -o $@"

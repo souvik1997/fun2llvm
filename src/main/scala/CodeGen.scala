@@ -13,17 +13,9 @@ object CodeGen {
 
     def indentedPrintln(indent: Int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
 
-    def generate(program: Program, output: PrintStream) : Unit = {
+    def generate(program: Program, output: PrintStream, librarySrc: String) : Unit = {
         program.functions.foreach(func => generateFunction(func, output, 0))
-        indentedPrintln(0, output, """define void @printNum(i64 %num) #0 {
-  %1 = alloca i64, align 8
-  store i64 %num, i64* %1, align 8
-  %2 = load i64, i64* %1, align 8
-  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i32 0, i32 0), i64 %2)
-  ret void
-}
-@.str = private unnamed_addr constant [5 x i8] c"%lu\0A\00", align 1
-declare i32 @printf(i8*, ...) #1""")
+        indentedPrintln(0, output, librarySrc)
     }
 
     /*
