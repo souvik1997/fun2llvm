@@ -10,8 +10,6 @@ import java.io.PrintStream
  */
 object CodeGen {
 
-    var curTemp: Int = 0
-    def getNextTempVar(): Int = { curTemp += 1; curTemp }
 
     def indentedPrintln(indent: Int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
 
@@ -24,16 +22,18 @@ object CodeGen {
      Suppose a local variable is called "xyz". It's local copy is "_xyz"
      */
     def generateFunction(function: Function, output: PrintStream, indent: Int): Unit = {
-        val formattedArguments = function.arguments.map("u64 " + _.name).mkString(",")
+        val formattedArguments = function.arguments.map("u64 " + _.name).mkString(", ")
 
         // TODO: The return type might be void or similar
-        output.println(s"define u64 @${function.name}($formattedArguments) ")
+        indentedPrintln(indent, output, s"define u64 @${function.name}($formattedArguments) {")
         function.arguments.foreach(f => {
             val local = "_" + f.name
             indentedPrintln(indent + 4, output, s"%${local} = alloca u64")
-            indentedPrintln(indent + 4, output, s"store u64 %${f} u64* ${local}")
+            indentedPrintln(indent + 4, output, s"store u64 %${f.name} u64* ${local}")
         })
-        generateStatement(function, function.body, output, indent + 4)
+        var tempVarCtr = 0
+        generateStatement(function, function.body, output, indent + 4, () => { tempVarCtr += 1; tempVarCtr })
+        indentedPrintln(indent, output, "}")
     }
 
     // NOTE: Question marks should be replaced by appropriate code for printing the LLVM code.
@@ -44,15 +44,15 @@ object CodeGen {
     /*
      * Generate a statement, writing the results to a print stream with the provided indentation.
      */
-    def generateStatement(context: Function, body: Statement, output: PrintStream, indent: Int): Unit = body match {
-        case Sequence(statements) => statements.foreach(state => generateStatement(context, state, output, indent))
+    def generateStatement(context: Function, body: Statement, output: PrintStream, indent: Int, getNextTempVar: () => Int): Unit = body match {
+        case Sequence(statements) => statements.foreach(state => generateStatement(context, state, output, indent, getNextTempVar))
         case Print(value) => {
-            val res = generateExpression(context, value, output, indent)
+            val res = generateExpression(context, value, output, indent, getNextTempVar)
             val junk = getNextTempVar()
-            indentedPrintln(indent, output, s"%${junk} = call printNum (${res})") // TODO: Implement the printNum function
+            indentedPrintln(indent, output, s"%${junk} = call printNum (%${res})") // TODO: Implement the printNum function
         }
         case Assign(variable, value) => {
-            val res = generateExpression(context, value, output, indent)
+            val res = generateExpression(context, value, output, indent, getNextTempVar)
             indentedPrintln(indent, output, s"store u64 %${res}, u64* %_${variable.name}")
         }
         case Return(value) => ???
@@ -65,54 +65,54 @@ object CodeGen {
      * Generates the LLVM IR for an expression, and returns the temporary variable that contains the value of this expression
      */
     def generateExpression(context: Function, expr: Expression, output: PrintStream,
-        indent: Int) : Int = {
+        indent: Int, getNextTempVar: () => Int) : Int = {
         val tempVariable = getNextTempVar()
         expr match {
             case Constant(value) => indentedPrintln(indent, output, s"%${tempVariable} = add u64 0, ${value}")
             case Variable(name) => {
-                val prefix = if (context.arguments.contains(name)) "%" else "@"
+                val prefix = if (context.arguments.map(_.name).contains(name)) "%_" else "@"
                 indentedPrintln(indent, output, s"%${tempVariable} = load u64, u64* ${prefix}${name}")
             }
             case Call(function, params) => {
-                val args = params.map(p => "%"+generateExpression(context, p, output, indent))
+                val args = params.map(p => "%"+generateExpression(context, p, output, indent, getNextTempVar))
                 indentedPrintln(indent, output, s"${tempVariable} = call u64 ${function} (${args})")
             }
 
             case Addition(left, right) => {
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${tempVariable} = add u64 %${ltmp}, %${rtmp}")
             }
             case Multiplication(left, right) => {
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${tempVariable} = mul u64 %${ltmp}, %${rtmp}")
             }
             case Equal(left, right) => {
                 val intermediate = getNextTempVar()
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${intermediate} = icmp eq u64 %${ltmp}, %${rtmp}")
                 indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to u64")
             }
             case LessThan(left, right) => {
                 val intermediate = getNextTempVar()
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ult u64 %${ltmp}, %${rtmp}")
                 indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to u64")
             }
             case GreaterThan(left, right) => {
                 val intermediate = getNextTempVar()
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ugt u64 %${ltmp}, %${rtmp}")
                 indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to u64")
             }
             case NotEqual(left, right) => {
                 val intermediate = getNextTempVar()
-                val ltmp = generateExpression(context, left, output, indent)
-                val rtmp = generateExpression(context, right, output, indent)
+                val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
+                val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ne u64 %${ltmp}, %${rtmp}")
                 indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to u64")
             }
