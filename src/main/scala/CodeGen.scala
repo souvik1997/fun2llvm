@@ -19,7 +19,7 @@ object CodeGen {
      Since variables in LLVM IR are immutable, we can't store directly to local variables.
      The solution: Immediately copy arguments to local variables, and use load/store to access and modify them.
 
-     Suppose a local variable is called "xyz". It's local copy is "_xyz"
+     Suppose a local variable is called "xyz". Its local copy is "_xyz"
      */
     def generateFunction(function: Function, output: PrintStream, indent: Int): Unit = {
         val formattedArguments = function.arguments.map("u64 " + _.name).mkString(", ")
