@@ -62,7 +62,7 @@ pd: $(SCALA_SOURCES)
 	@./sbt compile
 pdbins: $(PDLLS)
 
-$(PDLLS): %.ll : $(TESTS)
+$(PDLLS): %.ll : $(TESTS) lib/libfun.ll
 	@./sbt "project root" "run -i $*.fun -o $@"
 
 $(PDPROGS): %.pd.bin : %.ll
