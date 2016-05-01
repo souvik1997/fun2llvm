@@ -32,7 +32,7 @@ object CodeGen {
             indentedPrintln(indent + 4, output, s"store u64 %${f.name} u64* ${local}")
         })
         var tempVarCtr = 0
-        generateStatement(function, function.body, output, indent + 4, () => { tempVarCtr += 1; tempVarCtr })
+        generateStatement(function, function.body, output, indent + 4, () => { tempVarCtr += 1; tempVarCtr - 1 })
         indentedPrintln(indent, output, "}")
     }
 
