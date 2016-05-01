@@ -55,7 +55,10 @@ object CodeGen {
             val res = generateExpression(context, value, output, indent, getNextTempVar)
             indentedPrintln(indent, output, s"store u64 %${res}, u64* %_${variable.name}")
         }
-        case Return(value) => ???
+        case Return(value) => {
+            val res = generateExpression(context, value, output, indent, getNextTempVar)
+            indentedPrintln(indent, output, s"ret u64 %${res}")
+        }
         case If(pred, trueBody, falseBody) => ??? // Falsebody could be NoOp, so don't emit if it is
         case While(pred, body) => ???
         case NoOp => () // Emit nothing for No-op
