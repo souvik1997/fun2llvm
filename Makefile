@@ -58,8 +58,8 @@ p4test : Makefile $(P4DIFFS)
 pd: $(SCALA_SOURCES)
 	@./sbt compile
 
-$(PDLLS): $(TESTS) pd
-	@./sbt "project root" "run $@"
+$(PDLLS): %.ll : $(TESTS)
+	@./sbt "project root" "run -i $*.fun -o $@"
 
 $(PDPROGS): %.pd.bin : %.ll
 	clang -o $@ $*.ll
@@ -88,5 +88,6 @@ clean :
 	rm -rf tests/*.out
 	rm -rf tests/*.diff
 	rm -rf tests/*.bin
+	rm -rf tests/*.ll
 
 -include *.d
