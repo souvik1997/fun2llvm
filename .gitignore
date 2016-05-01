@@ -42,3 +42,6 @@ bin/
 .settings
 .project
 .classpath
+lib/libfun.ll
+tests/*.bin
+tests/*.ll
