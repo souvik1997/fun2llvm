@@ -13,7 +13,18 @@ object CodeGen {
 
     def indentedPrintln(indent: Int, output: PrintStream, str: String): Unit = output.println((" "*indent) + str)
 
-    def generate(program: Program, output: PrintStream) : Unit = program.functions.foreach(func => generateFunction(func, output, 0))
+    def generate(program: Program, output: PrintStream) : Unit = {
+        program.functions.foreach(func => generateFunction(func, output, 0))
+        indentedPrintln(0, output, """define void @printNum(i64 %num) #0 {
+  %1 = alloca i64, align 8
+  store i64 %num, i64* %1, align 8
+  %2 = load i64, i64* %1, align 8
+  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i32 0, i32 0), i64 %2)
+  ret void
+}
+@.str = private unnamed_addr constant [5 x i8] c"%lu\0A\00", align 1
+declare i32 @printf(i8*, ...) #1""")
+    }
 
     /*
      Since variables in LLVM IR are immutable, we can't store directly to local variables.
@@ -133,7 +144,7 @@ object CodeGen {
                 val intermediate = getNextTempVar()
                 indentedPrintln(indent, output, s"%${intermediate} = icmp eq i64 %${ltmp}, %${rtmp}")
                 val tempVariable = getNextTempVar()
-                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to i64")
+                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 %${intermediate} to i64")
                 return tempVariable
             }
             case LessThan(left, right) => {
@@ -142,7 +153,7 @@ object CodeGen {
                 val intermediate = getNextTempVar()
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ult i64 %${ltmp}, %${rtmp}")
                 val tempVariable = getNextTempVar()
-                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to i64")
+                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 %${intermediate} to i64")
                 return tempVariable
             }
             case GreaterThan(left, right) => {
@@ -151,16 +162,16 @@ object CodeGen {
                 val intermediate = getNextTempVar()
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ugt i64 %${ltmp}, %${rtmp}")
                 val tempVariable = getNextTempVar()
-                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to i64")
+                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 %${intermediate} to i64")
                 return tempVariable
             }
             case NotEqual(left, right) => {
-                val intermediate = getNextTempVar()
                 val ltmp = generateExpression(context, left, output, indent, getNextTempVar)
                 val rtmp = generateExpression(context, right, output, indent, getNextTempVar)
+                val intermediate = getNextTempVar()
                 indentedPrintln(indent, output, s"%${intermediate} = icmp ne i64 %${ltmp}, %${rtmp}")
                 val tempVariable = getNextTempVar()
-                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 ${intermediate} to i64")
+                indentedPrintln(indent, output, s"%${tempVariable} = zext i1 %${intermediate} to i64")
                 return tempVariable
             }
         }
