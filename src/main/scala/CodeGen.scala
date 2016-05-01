@@ -29,7 +29,7 @@ object CodeGen {
         function.arguments.foreach(f => {
             val local = "_" + f.name
             indentedPrintln(indent + 4, output, s"%${local} = alloca u64")
-            indentedPrintln(indent + 4, output, s"store u64 %${f.name} u64* ${local}")
+            indentedPrintln(indent + 4, output, s"store u64 %${f.name}, u64* ${local}")
         })
         var tempVarCtr = 0
         generateStatement(function, function.body, output, indent + 4, () => { tempVarCtr += 1; tempVarCtr - 1 })
