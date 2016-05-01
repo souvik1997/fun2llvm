@@ -66,7 +66,7 @@ $(PDLLS): %.ll : $(TESTS) lib/libfun.ll
 	@./sbt "project root" "run -i $*.fun -o $@"
 
 $(PDPROGS): %.pd.bin : %.ll
-	clang -o $@ $*.ll
+	clang -Ofast -o $@ $*.ll
 
 $(PDOUTS): %.pd.out : %.pd.bin
 	./$*.pd.bin > $*.pd.out
