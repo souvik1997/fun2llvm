@@ -44,7 +44,10 @@ object CodeGen {
 
         generateStatement(function.body)
 
-        Context.emit(s"ret i64 0")
+        Context.increaseIndent(4) {
+            Context.emit(s"ret i64 0")
+        }
+
         Context.emit("}")
     }
 
@@ -58,7 +61,7 @@ object CodeGen {
      */
     def generateStatement(statement: Statement)(implicit context: CodeGenContext) : Unit = Context.increaseIndent(4) {
         statement match {
-            case Sequence(statements) => statements.foreach(generateStatement)
+            case Sequence(statements) => Context.increaseIndent(-4) { statements.foreach(generateStatement) }
 
             case Print(value) => {
                 val res_reg = generateExpression(value)
