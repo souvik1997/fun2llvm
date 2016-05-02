@@ -8,7 +8,7 @@ P4RESULTS=$(patsubst %.fun,%.result,$(TESTS))
 PDPROGS=$(patsubst %.fun, %.pd.bin ,$(TESTS))
 PDLLS=$(patsubst %.fun, %.ll ,$(TESTS))
 PDOUTS=$(patsubst %.fun,%.pd.out,$(TESTS))
-P4DIFFS=$(patsubst %.fun,%.pd.diff,$(TESTS))
+PDDIFFS=$(patsubst %.fun,%.pd.diff,$(TESTS))
 P4RESULTS=$(patsubst %.fun,%.pd.result,$(TESTS))
 
 SRC = src
@@ -72,7 +72,7 @@ $(PDOUTS): %.pd.out : %.pd.bin
 	./$*.pd.bin > $*.pd.out
 
 $(PDDIFFS) : %.pd.diff : Makefile %.pd.out %.ok
-	@(((diff -b $*.ok $*.out > /dev/null 2>&1) && (echo "===> $* ... pass")) || (echo "===> $* ... fail" ; echo "----- expected ------"; cat $*.ok ; echo "----- found -----"; cat $*.out)) > $*.pd.diff 2>&1
+	(((diff -b $*.ok $*.pd.out > /dev/null 2>&1) && (echo "===> $* ... pass")) || (echo "===> $* ... fail" ; echo "----- expected ------"; cat $*.ok ; echo "----- found -----"; cat $*.pd.out)) > $*.pd.diff 2>&1
 
 
 pdtest: Makefile $(PDDIFFS)
