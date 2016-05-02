@@ -12,7 +12,7 @@ object CodeGen {
     def generate(program: Program, output: PrintStream, librarySrc: String) : Unit = {
         val globalVariables = collection.mutable.Set.empty[String]
         program.functions.foreach { func =>
-            implicit val context: CodeGenContext = CodeGenContext(program, func, output, 0, 1, globalVariables)
+            implicit val context: CodeGenContext = CodeGenContext(program, func, output, 0, 1, 0, globalVariables)
             generateFunction(func)(context)
         }
         
@@ -91,14 +91,23 @@ object CodeGen {
             }
 
             case If(pred, trueBody, falseBody) => {
+                val control_var = Context.nextControlVar
+
+                val labelPrefix = s"__${context.function.name}_if_${control_var}"
+                val labelPrefixBegin = s"${labelPrefix}_start"
+                val labelPrefixThen = s"${labelPrefix}_then"
+                val labelPrefixElse = s"${labelPrefix}_else"
+                val labelPrefixEnd = s"${labelPrefix}_end"
+                
+                // Create a new basic block starting here.
+                Context.emit(s"br label %${labelPrefixBegin}")
+                Context.emit("")
+                Context.emit(s"${labelPrefixBegin}:")
+                
                 val pred_reg = generateExpression(pred)
+
                 Context.withTempVar { truncatedCondition =>
                     Context.emit(s"%${truncatedCondition} = trunc i64 %${pred_reg} to i1")
-
-                    val labelPrefix = s"__${context.function.name}_if_${truncatedCondition}"
-                    val labelPrefixThen = s"${labelPrefix}_then"
-                    val labelPrefixElse = s"${labelPrefix}_else"
-                    val labelPrefixEnd = s"${labelPrefix}_end"
                     
                     Context.emit(s"br i1 %${truncatedCondition}, label %${labelPrefixThen}, label %${labelPrefixElse}")
 
@@ -114,20 +123,32 @@ object CodeGen {
                 }
             }
             case While(pred, body) =>  {
+                val control_var = Context.nextControlVar
+
+                val labelPrefix = s"__${context.function.name}_while_${control_var}"
+                val labelPrefixBegin = s"${labelPrefix}_begin"
+                val labelPrefixLoop = s"${labelPrefix}_loop"
+                val labelPrefixEnd = s"${labelPrefix}_end"
+
+                // Generate the start of the while loop, as well as the predicate
+                // The branch is what creates the new basic block.
+                Context.emit(s"br label %${labelPrefixBegin}")
+                Context.emit("")
+                Context.emit(s"${labelPrefixBegin}:")
+                
                 val pred_reg = generateExpression(pred)
-                Context.withTempVar2 { (truncatedCondition, _) =>
+
+                Context.withTempVar { truncatedCondition =>
+                    // Store the condition into a register, and then jump based on the condition.
                     Context.emit(s"%${truncatedCondition} = trunc i64 %${pred_reg} to i1")
 
-                    val labelPrefix = s"__${context.function.name}_while_${truncatedCondition}"
-                    val labelPrefixBegin = s"${labelPrefix}_begin"
-                    val labelPrefixEnd = s"${labelPrefix}_end"
-                    
-                    Context.emit(s"br label %${labelPrefixBegin}")
+                    Context.emit(s"br i1 %${truncatedCondition}, label %${labelPrefixLoop}, label %${labelPrefixEnd}")
 
-                    Context.emit(s"${labelPrefixBegin}:")
-                    Context.emit(s"br i1 %${truncatedCondition}, label %${labelPrefixBegin}, label %${labelPrefixEnd}")
+                    // Emit the main statement
+                    Context.emit(s"${labelPrefixLoop}:")
                     generateStatement(body)
 
+                    // Jump back to the beginning of the while loop
                     Context.emit(s"br label %${labelPrefixBegin}")
                     Context.emit(s"${labelPrefixEnd}:")
                 }
@@ -217,50 +238,70 @@ object CodeGen {
     }
 
     // Utility functions and classes for cleaner emission.
-    case class CodeGenContext(program: Program, function: Function, output: PrintStream, var indent: Int, var nextTempVar: Int,
-                                val globalVariables: collection.mutable.Set[String])
+    case class CodeGenContext(program: Program, function: Function, output: PrintStream, var indent: Int, 
+            var nextTempVar: Int, var nextControlVar: Int, val globalVariables: collection.mutable.Set[String])
 
     def indentedPrintln(indent: Int, output: PrintStream, str: String): Unit = output.println((" " * indent) + str)
 
     object Context {
+        /*
+         * Literally just drops a temporary variable without returning or using it. Only required
+         * due to some weird LLVM implicit block naming.
+         */
         def wasteTempVar(implicit context: CodeGenContext) = {
             context.nextTempVar += 1
+        }
+        
+        /*
+         * Returns the next "control variable", which is used in giving unique names to control labels
+         * like if and while.
+         */
+        def nextControlVar(implicit context: CodeGenContext) : Int = {
+            val returnValue = context.nextControlVar
+            context.nextControlVar += 1
+            returnValue
+        }
+        
+        /*
+         * Returns the next available temporary variable.
+         */
+        def nextTempVar(implicit context: CodeGenContext) : Int = {
+            val returnValue = context.nextTempVar
+            context.nextTempVar += 1
+            returnValue
         }
 
         /*
          * Executes the provided function by providing it a single temporary variable, and updates the context.
          */
         def withTempVar[A](f: Int => A)(implicit context: CodeGenContext) : A = {
-            context.nextTempVar = context.nextTempVar + 1
-            f(context.nextTempVar - 1)
+            val tempVar = Context.nextTempVar
+            f(tempVar)
         }
 
         /*
          * Executes the provided function by providing it two temporary variables, and updates the context.
          */
         def withTempVar2[A](f: (Int, Int) => A)(implicit context: CodeGenContext) : A = {
-            context.nextTempVar = context.nextTempVar + 2
-            f(context.nextTempVar - 2, context.nextTempVar - 1)
-        }
-
-        /*
-         * Executes the provided function by providing it three temporary variables, and updates the context.
-         */
-        def withTempVar3[A](f: (Int, Int, Int) => A)(implicit context: CodeGenContext) : A = {
-            context.nextTempVar = context.nextTempVar + 3
-            f(context.nextTempVar - 3, context.nextTempVar - 2, context.nextTempVar - 1)
+            val tempVar = Context.nextTempVar
+            val tempVar2 = Context.nextTempVar
+            f(tempVar, tempVar2)
         }
 
         // Exactly the same as the with- functions, but returns the last temporary variable automatically.
 
-        def yieldTempVar[A](f: Int => A)(implicit context: CodeGenContext) =
-        { withTempVar(f); context.nextTempVar - 1 }
+        def yieldTempVar[A](f: Int => A)(implicit context: CodeGenContext) : Int = {
+            val tempVar = Context.nextTempVar
+            f(tempVar)
+            tempVar
+        }
 
-        def yieldTempVar2[A](f: (Int, Int) => A)(implicit context: CodeGenContext) =
-        { withTempVar2(f); context.nextTempVar - 1 }
-
-        def yieldTempVar3[A](f: (Int, Int, Int) => A)(implicit context: CodeGenContext) =
-        { withTempVar3(f); context.nextTempVar - 1 }
+        def yieldTempVar2[A](f: (Int, Int) => A)(implicit context: CodeGenContext) : Int = {
+            val tempVar = Context.nextTempVar
+            val tempVar2 = Context.nextTempVar
+            f(tempVar, tempVar2)
+            tempVar2
+        }
 
         /*
          * Emits the provided LLVM.
