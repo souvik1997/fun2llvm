@@ -1,6 +1,7 @@
 package pd
 
 import Syntax._
+import pd.Syntax
 /*
  * Responsible for taking the AST and providing simple optimizations.
  */

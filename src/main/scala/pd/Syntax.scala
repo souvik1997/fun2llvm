@@ -130,25 +130,35 @@ object Syntax {
          */
         def transformChildrenUp(f: Expression => Expression) : Expression =
             transformChildren(child => child.transformChildrenUp(f)).transform(f)
+            
+        def foldUp[A](initial: A)(f: (A, Expression) => A) : A
     }
 
     // Represents a constant value.
     case class Constant(val value: Long) extends Expression {
         def transformChildren(f: Expression => Expression) = this
+        
+        def foldUp[A](initial: A)(f: (A, Expression) => A) = f(initial, this)
     }
 
     // Represents a variable which may have a dynamic value at runtime.
     case class Variable(val name: String) extends Expression {
         def transformChildren(f: Expression => Expression) = this
+        
+        def foldUp[A](initial: A)(f: (A, Expression) => A) = f(initial, this)
     }
 
     // Represents a function call with a specific set of parameters.
     case class Call(val function: String, val parameters: ListOf[Expression]) extends Expression {
         def transformChildren(f: Expression => Expression) = Call(function, parameters.map(f))
+        
+        def foldUp[A](initial: A)(f: (A, Expression) => A) = f(parameters.foldLeft(initial)(f), this)
     }
 
     // Represents the set of binary operations between two subexpressions.
-    sealed abstract class BinaryOperation(val left: Expression, val right: Expression) extends Expression
+    sealed abstract class BinaryOperation(val left: Expression, val right: Expression) extends Expression {
+        def foldUp[A](initial: A)(f: (A, Expression) => A) = f(f(f(initial, left), right), this)
+    }
 
     // Represents integer addition between two subexpressions.
     case class Addition(override val left: Expression, override val right: Expression) extends BinaryOperation(left, right) {

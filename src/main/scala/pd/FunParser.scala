@@ -2,6 +2,9 @@ package pd
 
 import fastparse.all._
 import Syntax._
+import pd.Syntax
+import scala.Left
+import scala.Right
 
 /*
  * Implements the parser part of pd, which is responsible for taking the raw FUN source
@@ -79,17 +82,17 @@ object FunParser {
     def parens : P[Expression] = P(char('(') ~/ expression ~/ char(')'))
 
     // Resolves a function call of the form <identifier>(expr1, ...)
-    def functionCall : P[Expression] = P(identifier.! ~ char('(') ~/ expression.rep(sep = commaSeperator) ~/ char(')'))
+    def functionCall : P[Expression] = P(identifier ~ char('(') ~/ expression.rep(sep = commaSeperator) ~/ char(')'))
       .map { case ((name, params)) => Call(name, params.toList) }
 
     // The highest precedence is either a constant, a variable, or a paren-wrapped expression.
     def expr_pred0 : P[Expression] = P(functionCall | constant | variable | parens)
 
     // Followed by multiplicative stuff
-    def expr_pred1 : P[Expression] = createPrecedenceParser(expr_pred0)("+" -> Addition)
+    def expr_pred1 : P[Expression] = createPrecedenceParser(expr_pred0)("*" -> Multiplication)
 
     // Followed by additive stuff
-    def expr_pred2 : P[Expression] = createPrecedenceParser(expr_pred1)("*" -> Multiplication)
+    def expr_pred2 : P[Expression] = createPrecedenceParser(expr_pred1)("+" -> Addition)
 
     // Followed finally by comparison operators.
     def expr_pred3 : P[Expression] = createPrecedenceParser(expr_pred2)(
