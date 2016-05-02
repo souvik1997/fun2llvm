@@ -127,43 +127,57 @@ object CodeGen {
             Context.emit(s"%${temp} = load i64, i64* ${prefix}${name}")
         }
 
-        case Call(function, params) => Context.yieldTempVar { temp =>
+        case Call(function, params) => {
             val args = params.map(p => "i64 %" + generateExpression(p)).mkString(", ")
-            Context.emit(s"%${temp} = call i64 @${function.trim} (${args})")
+            Context.yieldTempVar { temp =>
+                Context.emit(s"%${temp} = call i64 @${function.trim} (${args})")
+            }
         }
 
-        case Addition(left, right) => Context.yieldTempVar { temp =>
+        case Addition(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp} = add i64 %${ltmp}, %${rtmp}")
+            Context.yieldTempVar { temp =>
+                Context.emit(s"%${temp} = add i64 %${ltmp}, %${rtmp}")
+            }
         }
 
-        case Multiplication(left, right) => Context.yieldTempVar { temp =>
+        case Multiplication(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp} = mul i64 %${ltmp}, %${rtmp}")
+            Context.yieldTempVar { temp =>
+                Context.emit(s"%${temp} = mul i64 %${ltmp}, %${rtmp}")
+            }
         }
 
-        case Equal(left, right) => Context.yieldTempVar2 { (temp1, temp2) =>
+        case Equal(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp1} = icmp eq i64 %${ltmp}, %${rtmp}")
-            Context.emit(s"%${temp2} = zext i1 ${temp1} to i64")
+            Context.yieldTempVar2 { (temp1, temp2) =>
+                Context.emit(s"%${temp1} = icmp eq i64 %${ltmp}, %${rtmp}")
+                Context.emit(s"%${temp2} = zext i1 %${temp1} to i64")
+            }
         }
 
-        case LessThan(left, right) => Context.yieldTempVar2 { (temp1, temp2) =>
+        case LessThan(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp1} = icmp ult u64 %${ltmp}, %${rtmp}")
-            Context.emit(s"%${temp2} = zext i1 ${temp1} to i64")
+            Context.yieldTempVar2 { (temp1, temp2) =>
+                Context.emit(s"%${temp1} = icmp ult i64 %${ltmp}, %${rtmp}")
+                Context.emit(s"%${temp2} = zext i1 %${temp1} to i64")
+            }
         }
 
-        case GreaterThan(left, right) => Context.yieldTempVar2 { (temp1, temp2) =>
+        case GreaterThan(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp1} = icmp ugt u64 %${ltmp}, %${rtmp}")
-            Context.emit(s"%${temp2} = zext i1 ${temp1} to i64")
+            Context.yieldTempVar2 { (temp1, temp2) =>
+                Context.emit(s"%${temp1} = icmp ugt i64 %${ltmp}, %${rtmp}")
+                Context.emit(s"%${temp2} = zext i1 %${temp1} to i64")
+            }
         }
 
-        case NotEqual(left, right) => Context.yieldTempVar2 { (temp1, temp2) =>
+        case NotEqual(left, right) => {
             val (ltmp, rtmp) = (generateExpression(left), generateExpression(right))
-            Context.emit(s"%${temp1} = icmp ne i64 %${ltmp}, %${rtmp}")
-            Context.emit(s"%${temp2} = zext i1 ${temp1} to i64")
+            Context.yieldTempVar2 { (temp1, temp2) =>
+                Context.emit(s"%${temp1} = icmp ne i64 %${ltmp}, %${rtmp}")
+                Context.emit(s"%${temp2} = zext i1 %${temp1} to i64")
+            }
         }
     }
 
@@ -198,13 +212,13 @@ object CodeGen {
         // Exactly the same as the with- functions, but returns the last temporary variable automatically.
 
         def yieldTempVar[A](f: Int => A)(implicit context: CodeGenContext) =
-            { withTempVar(f); context.nextTempVar - 1 }
+        { withTempVar(f); context.nextTempVar - 1 }
 
         def yieldTempVar2[A](f: (Int, Int) => A)(implicit context: CodeGenContext) =
-            { withTempVar2(f); context.nextTempVar - 1 }
+        { withTempVar2(f); context.nextTempVar - 1 }
 
         def yieldTempVar3[A](f: (Int, Int, Int) => A)(implicit context: CodeGenContext) =
-            { withTempVar3(f); context.nextTempVar - 1 }
+        { withTempVar3(f); context.nextTempVar - 1 }
 
         /*
          * Emits the provided LLVM.
