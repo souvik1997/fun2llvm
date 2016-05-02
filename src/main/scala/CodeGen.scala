@@ -38,7 +38,7 @@ object CodeGen {
 
             Context.increaseIndent(4) {
                 Context.emit(s"%${local} = alloca i64")
-                Context.emit(s"store i64 %${arg.name}, i64* ${local}")
+                Context.emit(s"store i64 %${arg.name}, i64* %${local}")
             }
         }
 
@@ -124,7 +124,7 @@ object CodeGen {
 
         case Variable(name) => Context.yieldTempVar { temp =>
             val prefix = if(Context.isGlobalVariable(name)) "%_" else "@"
-            Context.emit(s"%${temp} = load i64, i64* ${prefix}${name}")
+            Context.emit(s"%${temp} = load i64* ${prefix}${name}")
         }
 
         case Call(function, params) => {
