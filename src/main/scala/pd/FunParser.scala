@@ -2,7 +2,6 @@ package pd
 
 import fastparse.all._
 import Syntax._
-import pd.Syntax
 import scala.Left
 import scala.Right
 
@@ -137,7 +136,7 @@ object FunParser {
     // a statement.
 
     def function : P[Function] = P(token("fun") ~/ whitespaceRep ~/ identifier.! ~/ whitespaceRep ~ char('(') ~/ variable.rep(sep = commaSeperator) ~/ char(')') ~/ statement)
-      .map { case (name, vars, statement) => Function(name, vars.toList, statement) }
+        .map { case (name, vars, statement) => Function(name, vars.toList, statement) }
 
     // A full program parser, which attempts to parse the entire file as a program.
     def program = P(Start ~ whitespaceRep ~ function.rep ~ whitespaceRep ~ End).map { case functions => Program(functions.toList) }

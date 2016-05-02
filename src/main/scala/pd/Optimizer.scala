@@ -1,7 +1,7 @@
 package pd
 
 import Syntax._
-import pd.Syntax
+
 /*
  * Responsible for taking the AST and providing simple optimizations.
  */
@@ -20,12 +20,12 @@ object Optimizer {
     /*
      * Optimizes a statement recursively, by optimizing all children and then optimizing the provided statement.
      */
-    def optimizeStatement(root: Statement) : Statement = root.transformChildrenUp(optimizeSingleStatement)
+    def optimizeStatement(root: Statement): Statement = root.transformChildrenUp(optimizeSingleStatement)
 
     /*
      * Optimizes an expression recursively, by optimizing all children and then optimizing the provided statement.
      */
-    def optimizeExpr(root: Expression) : Expression = root.transformChildrenUp(optimizeSingleExpr)
+    def optimizeExpr(root: Expression): Expression = root.transformChildrenUp(optimizeSingleExpr)
 
     /*
      * Optimizes a statement and eturns a new, optimized statement.
@@ -49,7 +49,6 @@ object Optimizer {
 
         case NoOp => NoOp
     }
-
 
     protected def optimizeSingleExpr(expr: Expression): Expression = expr match {
         /*

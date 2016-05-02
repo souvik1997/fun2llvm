@@ -2,7 +2,6 @@ package pd
 
 import Syntax._
 import java.io.PrintStream
-import pd.Syntax
 
 /*
  * Responsible for taking a syntax tree and converting it to
@@ -87,6 +86,7 @@ object CodeGen {
                 val res_reg = generateExpression(value)
                 Context.emit(s"ret i64 %${res_reg}")
                 
+                // This lovely thing is due to return creating a new Basic Block, so we need to index appropriately.
                 Context.wasteTempVar
             }
 

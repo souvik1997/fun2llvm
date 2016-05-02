@@ -6,9 +6,7 @@ import CodeGen._
 import scopt._
 import java.io.File
 import java.io.PrintStream
-import pd.Syntax
-import pd.CodeGen
-import pd.FunParser
+
 /*
  * Primary entry-point of the compiler; takes input from files and then passes it through
  * the parser, optimizer, and then LLVM generator.

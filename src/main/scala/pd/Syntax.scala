@@ -17,23 +17,23 @@ object Syntax {
          * Maps each function into a list of output functions, which can be empty, contain one function,
          * or contain many functions.
          */
-        def flatMapFunctions(f: Function => ListOf[Function]) : Program = this.copy(functions = functions.flatMap(f))
+        def flatMapFunctions(f: Function => ListOf[Function]): Program = this.copy(functions = functions.flatMap(f))
 
         /*
          * Maps each function in the program to another function.
          */
-        def mapFunctions(f: Function => Function) : Program = this.copy(functions = functions.map(f))
+        def mapFunctions(f: Function => Function): Program = this.copy(functions = functions.map(f))
 
         /*
          * Folds over the functions in the program, with a given initial value. Folds from Left -> Right, in order of
          * the functions original definition in the file (or some other compiler-defined order).
          */
-        def foldLeft[A](initial: A)(f: (A, Function) => A) : A = functions.foldLeft(initial)(f)
+        def foldLeft[A](initial: A)(f: (A, Function) => A): A = functions.foldLeft(initial)(f)
 
         /*
          * Applies a (presumably side-effecting) function to each function in this.
          */
-        def foreach[A](f: Function => A) : Unit = functions.foreach(f)
+        def foreach[A](f: Function => A): Unit = functions.foreach(f)
     }
 
     // Represents a function, which has a name, a scope, and a statement body.
@@ -43,35 +43,33 @@ object Syntax {
          * Transforms this function by applying the given function to it, and returns the new function
          * produced.
          */
-        def transform(f: Function => Function) : Function = f(this)
+        def transform(f: Function => Function): Function = f(this)
 
         /*
          * Applies some function to the statement of this function, returning a new function with the
          * mapped statement.
          */
-        def mapStatement(f: Statement => Statement) : Function = this.copy(body = f(body))
+        def mapStatement(f: Statement => Statement): Function = this.copy(body = f(body))
     }
-
-
 
     // A generic representation of some kind of "statement" which can be executed for it's side effects.
     sealed trait Statement {
         /*
          * Transforms this statement by applying the given function to it, and returns the new statement produced.
          */
-        def transform(f: Statement => Statement) : Statement = f(this)
+        def transform(f: Statement => Statement): Statement = f(this)
 
         /*
          * Transforms the immediate children of this statement with the given function,
          * returning the statement with the transformed children.
          */
-        def transformChildren(f: Statement => Statement) : Statement
+        def transformChildren(f: Statement => Statement): Statement
 
         /*
          * Transforms all of the children of this statement from the bottom of the tree to the top
          * of the tree, which garuantees that all child nodes are processed before a parent node is processed.
          */
-        def transformChildrenUp(f: Statement => Statement) : Statement =
+        def transformChildrenUp(f: Statement => Statement): Statement =
             transformChildrenUp(child => child.transformChildrenUp(f)).transform(f)
     }
 
@@ -115,43 +113,43 @@ object Syntax {
         /*
          * Transforms this expression by applying the given function to it, and returns the created expression.
          */
-        def transform(f: Expression => Expression) : Expression = f(this)
+        def transform(f: Expression => Expression): Expression = f(this)
 
         /*
          * Transforms the immediate children of this expression by the given function,
          * and returns this expression with the mapped children.
          */
-        def transformChildren(f: Expression => Expression) : Expression
+        def transformChildren(f: Expression => Expression): Expression
 
         /*
          * Maps the function from the bottom of the tree up to the top of the expression tree;
          * this garuantees that the transforming function will be called on the current node only
          * after it has been called on all of the children.
          */
-        def transformChildrenUp(f: Expression => Expression) : Expression =
+        def transformChildrenUp(f: Expression => Expression): Expression =
             transformChildren(child => child.transformChildrenUp(f)).transform(f)
-            
-        def foldUp[A](initial: A)(f: (A, Expression) => A) : A
+
+        def foldUp[A](initial: A)(f: (A, Expression) => A): A
     }
 
     // Represents a constant value.
     case class Constant(val value: Long) extends Expression {
         def transformChildren(f: Expression => Expression) = this
-        
+
         def foldUp[A](initial: A)(f: (A, Expression) => A) = f(initial, this)
     }
 
     // Represents a variable which may have a dynamic value at runtime.
     case class Variable(val name: String) extends Expression {
         def transformChildren(f: Expression => Expression) = this
-        
+
         def foldUp[A](initial: A)(f: (A, Expression) => A) = f(initial, this)
     }
 
     // Represents a function call with a specific set of parameters.
     case class Call(val function: String, val parameters: ListOf[Expression]) extends Expression {
         def transformChildren(f: Expression => Expression) = Call(function, parameters.map(f))
-        
+
         def foldUp[A](initial: A)(f: (A, Expression) => A) = f(parameters.foldLeft(initial)(f), this)
     }
 
