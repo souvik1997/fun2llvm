@@ -1,13 +1,63 @@
 Contribution of each team member:
 
+	- Saket Sadani: Implemented the majority of our Optimizer (via Optimizer.scala),
+		as well as provided several test cases. Did research into annoying LLVM bugs,
+		such as discovering what on earth a basic block is.
+	- Souvik Banerjee: Figured out the strange details of LLVM and wrote most of the
+		Code Generator for LLVM (via CodeGen.scala), as well as figured out the black
+		magic that is bash scripts and Makefiles. Provided his p4 for the reference
+		implementation during testing and development. Also figured out how to allow
+		for command-line flags (like -i and -o).
+	- Michael "Tres" Brenan: Somehow convinced the group to use Scala. Wrote the parser
+		using Parser Combinators (via Parser.scala), the AST (via Syntax.scala),
+		and cleaned up code in other parts to be more idiomatic.
 
 What did you propose to do?
+
+	As seen in PROPOSAL.txt, we proposed to reimplement p4 (and by extension, p3 and p5)
+	by implementing a LLVM-based fun compiler (which can compile to a ridiculous number
+	of targets).
+		- We additionally aimed to add additional common operators like Subtraction
+		  and division.
+		- Furthermore, we aimed to implement some optimizations like dead code
+		  elimination and loop unrolling.
+		- We also planned to implement some basic benchmarking to highlight any
+		  differences in the code.
 
 
 what did you actually do?
 
+	We successfully implemented the LLVM-based compiler for the fun language in Scala,
+	which can implement the entirety of the fun language (as defined in p4 and p5) and
+	emit somewhat reasonable LLVM IR.
+
+	Furthermore, we implemented some very simple optimizations like constant folding
+	and dead code elimination, but time restrictions made loop unrolling, loop invariant
+	removal, and other optimizations somewhat infeasible.
+
+	We did _not_ end up implementing other operators, though we could do so very easily,
+	simply because they didn't particularly add anything technically interesting or
+	challenging.
+
+	Furthermore, we did provide some basic benchmarking code (via ./benchmark.sh), but
+	most of the tests were so trivial that they still took 0.00s regardless of how bad
+	the compiler used was.
 
 What was difficult?
 
+	The most difficult part of the project was definitely puzzling out how LLVM worked,
+	and how to emit proper LLVM IR. LLVM is very particular about "basic blocks" of code,
+	as well as the specific ordering and naming of temporary registers.
+
+	On a side note, picking a nice language like Scala hampers productivity somewhat when
+	team members don't really know how to use it. The code was pretty at the end, though.
 
 What did you learn?
+
+	The project offered an opportunity to learn a lot about LLVM itself (including
+	the niceties of platform-independent intermediate representations, as well as the
+	vices of what is still essentially an assembly language).
+
+	Furthermore, the project offered some nice insights into how powerful optimizations
+	are, and how difficult they can be to implement effectively (as well as how much
+	better LLVM is at doing it than we are).
