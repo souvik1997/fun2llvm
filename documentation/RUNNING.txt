@@ -5,4 +5,4 @@ Run `make pdtest`
 
 Explain why your supplied tests illustrate that your project works
 
-Our supplied tests are the same as the tests we used for p4 and p5.
+Our supplied tests are the same as the tests we used for p4 and p5. As such we can see that our LLVM IR compiles correctly.
