@@ -1,8 +1,17 @@
 Please include clear and simple instructions for running your project.
-Run `git submodule update --init`.
-cd into `cs429h_pd`
-Run `make pdtest`
+
+       Run `git submodule update --init`.
+       cd into `cs429h_pd`
+       Run `make pdtest`
 
 Explain why your supplied tests illustrate that your project works
 
-Our supplied tests are the same as the tests we used for p4 and p5. As such we can see that our LLVM IR compiles correctly.
+        The tests which are included with this project can be found in the tests/ folder, and include all of the
+        default tests used to check p4/p5, as well as several other tests created/provided by the team members.
+
+        The default programs from p4/p5 (t0..t7) were used to check for basic correctness (by simply ensuring that
+        the compiled program did indeed produce the expected values), and then the extra programs (ts0..tsa) were
+        used to check some strange edge cases and to supplement the normal testing material.
+
+        Considering that they all somehow pass, the compiler is indeed operable (and LLVM can produce some very optimized
+        and tight assembly).
