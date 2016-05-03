@@ -1,3 +1,8 @@
 Please include clear and simple instructions for running your project.
+Run `git submodule update --init`.
+cd into `cs429h_pd`
+Run `make pdtest`
 
 Explain why your supplied tests illustrate that your project works
+
+Our supplied tests are the same as the tests we used for p4 and p5.
